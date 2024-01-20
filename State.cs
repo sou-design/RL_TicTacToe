@@ -1,4 +1,5 @@
 ﻿using NPOI.SS.Formula.Functions;
+using Raylib_cs;
 using Spectre.Console;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,6 @@ namespace tictactoe.State
 {
     public class State
     {
-
         public int[,] Data { get; set; }
         public int Winner { get; set; }
         public object HashVal { get; set; }
@@ -20,7 +20,6 @@ namespace tictactoe.State
         {
             Data = new int[3, 3];
 
-            // Initialize each element with zero
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 3; j++)
@@ -37,9 +36,7 @@ namespace tictactoe.State
         {
             if (HashVal is null)
             {
-                //HashVal = (int)HashVal;
                 HashVal = 0;
-                // Assuming Data is a 2D array of integers
                 foreach (var item in Data)
                 {
                     HashVal = (int)HashVal * 3 + item + 1;
@@ -80,8 +77,6 @@ namespace tictactoe.State
                 }
                 results.Add(colSum);
             }
-
-           
             int trace = 0;
             int reverseTrace = 0;
             for (int i = 0; i < 3; i++)
@@ -124,36 +119,40 @@ namespace tictactoe.State
             End = false;
             return false;
         }
-
         public State NextState(int i, int j, int symbol)
         {
             State newState = new State();
             Array.Copy(Data, newState.Data, Data.Length); 
-            //newState.Data = (int[,])Data.Clone();
             newState.Data[i, j] = symbol;
             return newState;
         }
-
         public void PrintState()
         {
+            const int cellSize = 200;
+
             for (int i = 0; i < 3; i++)
             {
-                Console.WriteLine("-------------");
-                string outStr = "| ";
                 for (int j = 0; j < 3; j++)
                 {
-                    char token;
+                    string outStr = "";
+
                     if (Data[i, j] == 1)
-                        token = '*';
+                    {
+                        outStr = "X";
+                    }
                     else if (Data[i, j] == -1)
-                        token = 'x';
+                    {
+                        outStr = "O";
+                    }
                     else
-                        token = '0';
-                    outStr += token + " | ";
+                    {
+                        outStr = " ";
+                    }
+                    int xPos = j * cellSize + cellSize / 4;
+                    int yPos = i * cellSize + cellSize / 2;
+                    Raylib.DrawText(outStr, xPos, yPos, 48, Raylib_cs.Color.BLACK);
                 }
-                Console.WriteLine(outStr);
             }
-            Console.WriteLine("-------------");
         }
     }
     

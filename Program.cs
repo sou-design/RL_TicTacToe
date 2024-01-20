@@ -4,79 +4,140 @@ using Color = Spectre.Console.Color;
 using Raylib_cs;
 using tictactoe.State;
 using System.Numerics;
+using tictactoe.RaylibManager;
+using AngleSharp.Html.Dom.Events;
+using MouseButton = Raylib_cs.MouseButton;
+
 public class Program
 {
-        static void Main(string[] args)
-        {
+    public static Vector2 mousePosition=Vector2.Zero;
+    public static State gameState = new State();
+    public static RaylibManager raylibManager;
+    public static Human human;
+    public static Machine machine;
+    static void Main(string[] args)
+    {   
+        raylibManager = RaylibManager.Instance;
+        int buttonSize = 200;
+        int buttonSpacing = 10;
+        Train(100000, 500);
+        Compete(1000);
 
-            var all_states = GameUtility.GetAllStates();
-            Console.WriteLine(all_states.Count);
-            Train(100000, 500);
-            Compete(1000);
-            const int screenWidth = 600;
-            const int screenHeight = 600;
-
-            Raylib.InitWindow(screenWidth, screenHeight, "RL Tic Tac Toe");
+        raylibManager.InitWindow(600, 600, "RL Tic Tac Toe");
         // Define button size and spacing
-            int buttonSize = 200;
-            int buttonSpacing = 10;
 
-            while (!Raylib.WindowShouldClose())
-            {
-                // Detect mouse position
-                Vector2 mousePosition = Raylib.GetMousePosition();
-
-                // Draw the tic-tac-toe board with buttons
-                DrawBoard(buttonSize, buttonSpacing, mousePosition);
-
-                Raylib.BeginDrawing();
-                Raylib.ClearBackground(Raylib_cs.Color.RAYWHITE);
-
-                // Draw other game elements
-
-                Raylib.EndDrawing();
-            }
-            Raylib.CloseWindow();
-            }
-    static void DrawBoard(int buttonSize, int buttonSpacing, Vector2 mousePosition)
-    {
-        for (int row = 0; row < 3; row++)
+        bool flag = false;
+        var all_states = GameUtility.GetAllStates();
+        List<MouseEvent> mouseEvents = new List<MouseEvent>();
+        bool roundIsRuning = true; bool is_end = false;
+        while (!Raylib.WindowShouldClose())
         {
-            for (int col = 0; col < 3; col++)
+            all_states = GameUtility.GetAllStates();
+            flag = false;
+            // Draw other game elements
+
+            human = new Human(raylibManager);
+            machine = new Machine(0);
+            human.SetSymbol(1);
+            machine.SetSymbol(-1,all_states); 
+            var ispressed = false;           
+            machine.LoadPolicy();
+
+
+            Console.WriteLine("clicked");
+            var alternator = Alternate2().GetEnumerator();
+            if (machine != null)
             {
-                // Calculate button position
-                int xPos = col * (buttonSize + buttonSpacing);
-                int yPos = row * (buttonSize + buttonSpacing);
-
-                // Check if the mouse is over the button
-                bool isMouseOver = Raylib.CheckCollisionPointRec(mousePosition, new Raylib_cs.Rectangle(xPos, yPos, buttonSize, buttonSize));
-
-                // Draw the button
-                Raylib.DrawRectangle(xPos, yPos, buttonSize, buttonSize, isMouseOver ? Raylib_cs.Color.GREEN : Raylib_cs.Color.LIGHTGRAY);
-
-                // Draw 'X' or 'O' on the button (modify this based on your game logic)
-                string buttonText = isMouseOver ? "Hovered" : "Button";
-                Raylib.DrawText(buttonText, xPos + buttonSize / 4, yPos + buttonSize / 3, 20, Raylib_cs.Color.BLACK);
+                machine.Reset();
             }
-        }
+            State currentState = new State();
+            human.SetState(currentState);
+            machine.SetState(currentState);
+            raylibManager.BeginDrawing();
+            raylibManager.resetDraws();
+            raylibManager.ClearBackground(Raylib_cs.Color.RAYWHITE);
+            raylibManager.DrawBoard(buttonSize, buttonSpacing, mousePosition);
+            
+            raylibManager.EndDrawing();
+            is_end = false;
+            roundIsRuning = true;
+            while (roundIsRuning)
+            {               
+                raylibManager.BeginDrawing();
+                raylibManager.ClearBackground(Raylib_cs.Color.RAYWHITE);
+                if (Raylib.IsMouseButtonPressed(MouseButton.MOUSE_LEFT_BUTTON) && !flag)
+                { 
+                    flag = true;
+                }
+                if (flag)
+                {
+                    var (i, j, symbol) = (-99, -99, -99);
+                    var c = alternator.MoveNext() ? alternator.Current : null;
+                    if (c == null)
+                    {
+                        break;
+                    }
+
+                    try
+                    {
+                        var player = (Machine)c;
+
+                        (i, j, symbol) = player.Act();
+                        int xPos = j * (buttonSize + buttonSpacing);
+                        int yPos = i * (buttonSize + buttonSpacing);
+                        var text = "O";
+                        raylibManager.draws[i, j] = "O";
+                        Console.WriteLine("O");
+                        symbol = -1;
+                        flag = false;
+                    }
+                    catch (InvalidCastException)
+                    {                       
+                        var mouse = raylibManager.MousePosition;
+                        var humanPlayer = (Human)c;
+                        j = (int)(mouse.X / (600 / 3));
+                        i = (int)(mouse.Y / (600 / 3));
+                        raylibManager.draws[i, j] = "X";
+                        symbol = 1;
+                        int xPos = j * (buttonSize + buttonSpacing);
+                        int yPos = i * (buttonSize + buttonSpacing);
+                        Console.WriteLine("X");
+                    }
+                        var nextHash = currentState.NextState(i, j, symbol).Hash();
+                        (currentState, is_end) = all_states[nextHash];
+                        human.SetState(currentState);
+                        machine.SetState(currentState);
+
+                    if (is_end)
+                    {
+                        raylibManager.EndDrawing();
+                        roundIsRuning = false;
+                        Console.WriteLine("end");
+                        if (currentState.Winner == machine.symbol)
+                        {
+                            Console.WriteLine("You lose!");
+                        }
+                        else if (currentState.Winner == human.symbol)
+                        {
+                            Console.WriteLine("You win!"); 
+                        }
+                        else
+                        {
+                            Console.WriteLine("It is a tie!"); 
+                        }
+                    }
+            
+                }
+                raylibManager.DrawBoard(buttonSize, buttonSpacing, mousePosition);
+                raylibManager.EndDrawing();
+            }
+        }   
     }
-    static void DrawX(int posX, int posY, Vector2 mousePosition)
-    {
-        bool isMouseOver = Raylib.CheckCollisionPointRec(mousePosition, new Raylib_cs.Rectangle(posX, posY, 200, 200));
-        string buttonText = "X";
-        Raylib.DrawText(buttonText, posX + 200 / 4, posY + 200 / 3, 20, Raylib_cs.Color.BLACK);
-    }
-    static void DrawO(int posX, int posY, Vector2 mousePosition)
-    {
-        
-        string buttonText = "O";
-        Raylib.DrawText(buttonText, posX + 200 / 4, posY + 200 / 3, 20, Raylib_cs.Color.BLACK);
-    }
-    static void Train(int epochs, int printEveryN = 500)
+        static void Train(int epochs, int printEveryN = 500)
         {
             Machine player1 = new Machine(0.01);
             Machine player2 = new Machine(0.01);
-            GameManager judger = new GameManager(player1, player2,null,0);
+            GameManager judger = new GameManager(player1, player2, null, 0, raylibManager);
             double player1Win = 0.0;
             double player2Win = 0.0;
 
@@ -102,12 +163,11 @@ public class Program
             player1.SavePolicy();
             player2.SavePolicy();
         }
-
         static void Compete(int turns)
         {
             Machine player1 = new Machine(0);
             Machine player2 = new Machine(0);
-            GameManager judger = new GameManager(player1, player2,null,0);
+            GameManager judger = new GameManager(player1, player2, null, 0, raylibManager);
             player1.LoadPolicy();
             player2.LoadPolicy();
             double player1Win = 0.0;
@@ -127,30 +187,14 @@ public class Program
 
             Console.WriteLine($"{turns} turns, player 1 win {player1Win / turns:F2}, player 2 win {player2Win / turns:F2}");
         }
-
-        static void Play()
+        public static IEnumerable<object> Alternate2()
         {
             while (true)
             {
-                Human player1 = new Human();
-                Machine player2 = new Machine(0);
-                GameManager judger = new GameManager(null, player2,player1,1);
-                player2.LoadPolicy();
-                int winner = judger.PlayHuman();
-
-                if (winner == player2.symbol)
-                {
-                    Console.WriteLine("You lose!");
-                }
-                else if (winner == player1.symbol)
-                {
-                    Console.WriteLine("You win!");
-                }
-                else
-                {
-                    Console.WriteLine("It is a tie!");
-                }
+                yield return human;
+                yield return machine;
             }
         }
-
     }
+
+

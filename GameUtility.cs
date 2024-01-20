@@ -7,7 +7,6 @@ using tictactoe.State;
 
 static class GameUtility
 {
-
     static void GetStates(State currentState, int currentSymbol, Dictionary<int, Tuple<State, bool>> allStates)
     {
         for (int i = 0; i < 3; i++)

@@ -23,19 +23,16 @@ public class Machine
         greedy = new List<bool>();
         symbol = 0;
     }
-
     public void Reset()
     {
         states.Clear();
         greedy.Clear();
     }
-
     public void SetState(State state)
     {
         states.Add(state);
         greedy.Add(true);
     }
-
     public void SetSymbol(int symbol, Dictionary<int, Tuple<State, bool>> all_states)
     {
         this.symbol = symbol;
@@ -64,7 +61,6 @@ public class Machine
             }
         }
     }
-
     public void Backup()
     {
         var states = this.states.ConvertAll(state => state.Hash());
@@ -76,7 +72,6 @@ public class Machine
             estimations[state] += stepSize * tdError;
         }
     }
-
     public (int i, int j, int symbol) Act()
     {
         var state = states[states.Count - 1];
@@ -102,20 +97,28 @@ public class Machine
             action.Add(symbol);
             greedy[greedy.Count - 1] = false;
             return (action[0], action[1], action[2]); // Return a tuple
-        }
+        }   
 
         var values = new List<(double, List<int>)>();
         foreach (var (hash_val, pos) in nextStates.Zip(nextPositions, (a, b) => (a, b)))
-        {
-            values.Add((estimations[hash_val], pos));
+        {           
+           values.Add((estimations[hash_val], pos));       
         }
-
         GameUtility.Shuffle(values); // Shuffle the list randomly
 
-        values.Sort((x, y) => y.Item1.CompareTo(x.Item1)); // Sort in descending order
+        values.Sort((x, y) => y.Item1.CompareTo(x.Item1));
 
+        // Sort in descending order
         var chosenAction = values[0].Item2;
-        chosenAction.Add(symbol);
+        if (values.Count > 0)
+        {            
+            chosenAction.Add(symbol); 
+        }
+        else
+        {
+            // Handle the case when values is empty, e.g., choose a default action
+        }
+        
         return (chosenAction[0], chosenAction[1], chosenAction[2]); // Return a tuple
     }
     public void SavePolicy()
@@ -124,7 +127,6 @@ public class Machine
         var jsonString = JsonSerializer.Serialize(estimations);
         File.WriteAllText(fileName, jsonString);
     }
-
     public void LoadPolicy()
     {
         var fileName = string.Format("policy_{0}.json", symbol == 1 ? "first" : "second");
@@ -134,7 +136,6 @@ public class Machine
             estimations = JsonSerializer.Deserialize<Dictionary<int, double>>(jsonString);
         }
     }
-
     public static implicit operator T(Machine v)
     {
         throw new NotImplementedException();

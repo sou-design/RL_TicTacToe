@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Raylib_cs;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using tictactoe.RaylibManager;
 using tictactoe.State;
 
     public class GameManager
@@ -15,9 +17,9 @@ using tictactoe.State;
         private int p1Symbol = 1;
         private int p2Symbol = -1;
         private State currentState;
-
-    public Dictionary<int, Tuple<State, bool>> all_states;
-    public GameManager(Machine player1, Machine player2,Human player2_,int type)
+        RaylibManager raylibManager;
+        public Dictionary<int, Tuple<State, bool>> all_states;
+        public GameManager(Machine player1, Machine player2,Human player2_,int type,RaylibManager raylibManager_)
         {
             p2 = player2;
             all_states = GameUtility.GetAllStates();
@@ -34,19 +36,21 @@ using tictactoe.State;
             
             currentPlayer = null;
             p2.SetSymbol(p2Symbol, all_states);
-            
+            raylibManager = raylibManager_;
             currentState = new State();
         }
         public void Reset()
         {
-        if (p1 != null)
-        { p1.Reset(); }
-        if (p2!=null)
-        {
-            p2.Reset();
-        }   
+            if (p1 != null)
+            { 
+                p1.Reset(); 
+            }
+            if (p2!=null)
+            {
+                p2.Reset();
+            }   
         }
-
+        
         public IEnumerable<Machine> Alternate()
         {
             while (true)
@@ -55,13 +59,13 @@ using tictactoe.State;
                 yield return p2;
             }
         }
-    public IEnumerable<object> Alternate2()
-    {
-        while (true)
+        public IEnumerable<object> Alternate2()
         {
-            yield return p3;
-            yield return p2;
-        }
+            while (true)
+            {
+                yield return p3;
+                yield return p2;
+            }
     }
 
     public int Play(bool printState = false)
@@ -71,11 +75,6 @@ using tictactoe.State;
         currentState = new State();
         p1.SetState(currentState);
         p2.SetState(currentState);
-        if (printState)
-        {
-            currentState.PrintState();
-        }
-
         while (true)
         {
             currentPlayer = alternator.MoveNext() ? alternator.Current : null;
@@ -89,26 +88,15 @@ using tictactoe.State;
             (currentState, var isEnd) = all_states[nextHash];
             p1.SetState(currentState);
             p2.SetState(currentState);
-            if (printState)
-            {
-                currentState.PrintState();
-            }
-
             if (isEnd)
             {
                 return currentState.Winner;
             }
         }
-
-        // This point should not be reached
         return 0;
-
     }
-
-
-    public int PlayHuman(bool printState = false)
+    public int PlayHuman(bool pressed,bool printState = false)
     {
-        
         var alternator = Alternate2().GetEnumerator();
         Reset();
         currentState = new State();
@@ -116,7 +104,7 @@ using tictactoe.State;
         p2.SetState(currentState);
         if (printState)
         {
-            currentState.PrintState();
+            //currentState.PrintState();
         }
 
         while (true)
@@ -131,30 +119,25 @@ using tictactoe.State;
             try
             {
                 var player = (Machine)c;
+
                 (i, j, symbol) = player.Act();
             }
             catch (InvalidCastException)
-            {
+            {                 
                 var humanPlayer = (Human)c;
-                (i, j, symbol) = humanPlayer.Act();
+                j = (int)(j/ (600 / 3)); 
+                i = (int)(i/ (600 / 3));
+                symbol = humanPlayer.symbol.Value;
             }
             var nextHash = currentState.NextState(i, j, symbol).Hash();
-            //State s = currentState.NextState(i, j, symbol);
-            //int nextHash = s.Hash();
             (currentState, var isEnd) = all_states[nextHash];
             p3.SetState(currentState);
             p2.SetState(currentState);
-            if (printState)
-            {
-                currentState.PrintState();
-            }
-
             if (isEnd)
             {
                 return currentState.Winner;
             }
         }
-
         return 0;
     }
 }
