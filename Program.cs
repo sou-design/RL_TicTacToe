@@ -17,15 +17,17 @@ public class Program
     public static Machine machine;
     static void Main(string[] args)
     {   
+        // Initialize RaylibManager
         raylibManager = RaylibManager.Instance;
         int buttonSize = 200;
         int buttonSpacing = 10;
+        // Train the machine players with a specified number of epochs and print frequency
         Train(100000, 500);
+        // Compete between trained machine players for a specified number of turns
         Compete(1000);
-
+        // Initialize Raylib window
         raylibManager.InitWindow(600, 600, "RL Tic Tac Toe");
-        // Define button size and spacing
-
+        // Initialize variables for game flow control and state tracking
         bool flag = false;
         var all_states = GameUtility.GetAllStates();
         List<MouseEvent> mouseEvents = new List<MouseEvent>();
@@ -34,54 +36,59 @@ public class Program
         {
             all_states = GameUtility.GetAllStates();
             flag = false;
-            // Draw other game elements
-
+            // Create instances of Human and Machine players
             human = new Human(raylibManager);
             machine = new Machine(0);
             human.SetSymbol(1);
             machine.SetSymbol(-1,all_states); 
-            var ispressed = false;           
+            var ispressed = false;
+            // Load the pre-trained policy for the machine player
             machine.LoadPolicy();
-
-
             Console.WriteLine("clicked");
+            // Create an enumerator for alternating between Human and Machine players
             var alternator = Alternate2().GetEnumerator();
+            // Reset the machine player if it exists
             if (machine != null)
             {
                 machine.Reset();
             }
-            State currentState = new State();
+            // Initialize the current game state
+            State currentState = new State(); 
             human.SetState(currentState);
             machine.SetState(currentState);
+            // Begin the Raylib drawing loop
             raylibManager.BeginDrawing();
+            // Reset the draws and clear the background
             raylibManager.resetDraws();
             raylibManager.ClearBackground(Raylib_cs.Color.RAYWHITE);
+            // Draw the Tic Tac Toe board
             raylibManager.DrawBoard(buttonSize, buttonSpacing, mousePosition);
-            
+            // End the Raylib drawing
             raylibManager.EndDrawing();
             is_end = false;
             roundIsRuning = true;
+            // Game loop
             while (roundIsRuning)
             {               
                 raylibManager.BeginDrawing();
                 raylibManager.ClearBackground(Raylib_cs.Color.RAYWHITE);
+                // Check if the left mouse button is pressed and update the flag
                 if (Raylib.IsMouseButtonPressed(MouseButton.MOUSE_LEFT_BUTTON) && !flag)
                 { 
                     flag = true;
                 }
                 if (flag)
-                {
+                {// Process player actions if the flag is set
                     var (i, j, symbol) = (-99, -99, -99);
                     var c = alternator.MoveNext() ? alternator.Current : null;
                     if (c == null)
                     {
                         break;
                     }
-
                     try
                     {
                         var player = (Machine)c;
-
+                        // Perform machine player action
                         (i, j, symbol) = player.Act();
                         int xPos = j * (buttonSize + buttonSpacing);
                         int yPos = i * (buttonSize + buttonSpacing);
@@ -92,7 +99,8 @@ public class Program
                         flag = false;
                     }
                     catch (InvalidCastException)
-                    {                       
+                    {
+                        // Perform human player action based on mouse position
                         var mouse = raylibManager.MousePosition;
                         var humanPlayer = (Human)c;
                         j = (int)(mouse.X / (600 / 3));
@@ -103,16 +111,18 @@ public class Program
                         int yPos = i * (buttonSize + buttonSpacing);
                         Console.WriteLine("X");
                     }
-                        var nextHash = currentState.NextState(i, j, symbol).Hash();
-                        (currentState, is_end) = all_states[nextHash];
-                        human.SetState(currentState);
-                        machine.SetState(currentState);
+                    // Update the game state based on the player action
+                    var nextHash = currentState.NextState(i, j, symbol).Hash();
+                    (currentState, is_end) = all_states[nextHash];
+                    human.SetState(currentState);
+                    machine.SetState(currentState);
 
                     if (is_end)
-                    {
+                    {// End the game if it is finished
                         raylibManager.EndDrawing();
                         roundIsRuning = false;
                         Console.WriteLine("end");
+                        // Display the game outcome
                         if (currentState.Winner == machine.symbol)
                         {
                             Console.WriteLine("You lose!");
@@ -128,12 +138,18 @@ public class Program
                     }
             
                 }
+                // Draw the Tic Tac Toe board
                 raylibManager.DrawBoard(buttonSize, buttonSpacing, mousePosition);
                 raylibManager.EndDrawing();
             }
         }   
     }
-        static void Train(int epochs, int printEveryN = 500)
+    /// <summary>
+    /// Trains the machine players through a specified number of epochs.
+    /// </summary>
+    /// <param name="epochs">The number of training epochs.</param>
+    /// <param name="printEveryN">The frequency to print training progress.</param>
+    static void Train(int epochs, int printEveryN = 500)
         {
             Machine player1 = new Machine(0.01);
             Machine player2 = new Machine(0.01);
@@ -163,7 +179,11 @@ public class Program
             player1.SavePolicy();
             player2.SavePolicy();
         }
-        static void Compete(int turns)
+    /// <summary>
+    /// Competes between pre-trained machine players for a specified number of turns.
+    /// </summary>
+    /// <param name="turns">The number of competition turns.</param>
+    static void Compete(int turns)
         {
             Machine player1 = new Machine(0);
             Machine player2 = new Machine(0);
@@ -187,7 +207,11 @@ public class Program
 
             Console.WriteLine($"{turns} turns, player 1 win {player1Win / turns:F2}, player 2 win {player2Win / turns:F2}");
         }
-        public static IEnumerable<object> Alternate2()
+    /// <summary>
+    /// Alternates between Human and Machine players infinitely.
+    /// </summary>
+    /// <returns>An enumerator for alternating between players.</returns>
+    public static IEnumerable<object> Alternate2()
         {
             while (true)
             {

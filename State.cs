@@ -9,13 +9,20 @@ using System.Threading.Tasks;
 
 namespace tictactoe.State
 {
+    /// <summary>
+    /// State : Represents the state of a Tic Tac Toe game.
+    /// Data : gets or sets the 3x3 grid of the Tic Tac Toe game.
+    /// Winner : Gets or sets the winner of the game (1 for 'X', -1 for 'O', 0 for a tie, initially set to 0).
+    /// HashVal : Gets or sets the hash value of the current state.
+    /// End : Gets or sets a value indicating whether the game has ended.
+    /// </summary>
     public class State
     {
         public int[,] Data { get; set; }
         public int Winner { get; set; }
         public object HashVal { get; set; }
         public bool End { get; set; }
-
+        
         public State()
         {
             Data = new int[3, 3];
@@ -31,7 +38,10 @@ namespace tictactoe.State
             HashVal = null;
             End = false;
         }
-
+        /// <summary>
+        /// Computes a hash value for the current state based on the contents of Data.
+        /// </summary>
+        /// <returns>The computed hash value.</returns>
         public int Hash()
         {
             if (HashVal is null)
@@ -46,14 +56,16 @@ namespace tictactoe.State
             return (int)HashVal;
         }
 
-
+        /// <summary>
+        /// Checks if the game has ended by examining rows, columns, and diagonals for a winner or a tie.
+        /// </summary>
+        /// <returns>True if the game has ended; else returns false.</returns>
         public bool IsEnd()
         {
             if (End)
             {
                 return true;
             }
-
             var results = new List<int>();
 
             // check row
@@ -67,7 +79,6 @@ namespace tictactoe.State
                 results.Add(rowSum);
             }
 
-           
             for (int i = 0; i < 3; i++)
             {
                 int colSum = 0;
@@ -102,8 +113,6 @@ namespace tictactoe.State
                     return true;
                 }
             }
-
-   
             int sumValues = 0;
             foreach (var value in Data)
             {
@@ -119,6 +128,13 @@ namespace tictactoe.State
             End = false;
             return false;
         }
+        /// <summary>
+        /// Generates the next state by copying the current state and updating the specified position with the given symbol.
+        /// </summary>
+        /// <param name="i">The row index.</param>
+        /// <param name="j">The column index.</param>
+        /// <param name="symbol">The symbol to update the position with (1 for 'X', -1 for 'O').</param>
+        /// <returns>The next state.</returns>
         public State NextState(int i, int j, int symbol)
         {
             State newState = new State();
@@ -154,6 +170,5 @@ namespace tictactoe.State
                 }
             }
         }
-    }
-    
+    } 
 }

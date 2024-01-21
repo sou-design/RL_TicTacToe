@@ -7,6 +7,9 @@ using tictactoe.State;
 
 static class GameUtility
 {
+    /// <summary>
+    /// Recursively generates all possible game states.
+    /// </summary>
     static void GetStates(State currentState, int currentSymbol, Dictionary<int, Tuple<State, bool>> allStates)
     {
         for (int i = 0; i < 3; i++)
@@ -32,7 +35,10 @@ static class GameUtility
             }
         }
     }
-
+    /// <summary>
+    /// Generates all possible game states and stores them in a dictionary.
+    /// </summary>
+    /// <returns>A dictionary containing all possible game states.</returns>
     public static Dictionary<int, Tuple<State, bool>> GetAllStates()
     {
         int currentSymbol = 1;
@@ -44,7 +50,9 @@ static class GameUtility
     }
 
     private static Random random = new Random();
-
+    /// <summary>
+    /// Shuffles the elements of a list.
+    /// </summary>
     public static void Shuffle<T>(this IList<T> list)
     {
         int n = list.Count;

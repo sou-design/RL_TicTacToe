@@ -8,15 +8,25 @@ using System.Threading.Tasks;
 
 namespace tictactoe.RaylibManager
 {
+    /// <summary>
+    /// Manages interactions with the Raylib library for the Tic Tac Toe game.
+    /// </summary>
     public class RaylibManager
     {
-
+        //Represents the current states of the game
         public string[,] draws = { { "*", "*", "*" }, { "*", "*", "*" }, { "*", "*", "*" } };
+        //Gets the current mouse position.
         public Vector2 MousePosition => Raylib.GetMousePosition();
+        /// <summary>
+        /// Initializes the Raylib window.
+        /// </summary>
         public void InitWindow(int width, int height, string title)
         {
             Raylib.InitWindow(width, height, title);
         }
+        /// <summary>
+        /// Resets the drawn symbols on the game board.
+        /// </summary>
         public void resetDraws()
         {
             Raylib.WaitTime(0.5);
@@ -29,10 +39,16 @@ namespace tictactoe.RaylibManager
                 }
             }
         }
+        /// <summary>
+        /// Checks if the specified mouse button is pressed.
+        /// </summary>
         public bool IsMouseButtonPressed(MouseButton button)
         {
             return Raylib.IsMouseButtonPressed(button);
         }
+        /// <summary>
+        /// Waits for the left mouse button to be pressed.
+        /// </summary>
         public void wait(MouseButton button)
         {
             while (!Raylib.IsMouseButtonPressed(button))
@@ -40,14 +56,23 @@ namespace tictactoe.RaylibManager
                 Raylib.WaitTime(2); 
             } 
         }
+        /// <summary>
+        /// Begins drawing.
+        /// </summary>
         public void BeginDrawing()
         {
             Raylib.BeginDrawing();
         }
+        /// <summary>
+        /// Ends drawing.
+        /// </summary>
         public void EndDrawing()
         {
             Raylib.EndDrawing();
         }
+        /// <summary>
+        /// Draws the Tic Tac Toe game board.
+        /// </summary>
         public void DrawBoard(int buttonSize, int buttonSpacing, Vector2 mousePosition)
         {
             //gameState.PrintState();
@@ -78,10 +103,16 @@ namespace tictactoe.RaylibManager
                 }
             }
         }
+        /// <summary>
+        /// Draws text on the screen.
+        /// </summary>
         public void DrawText(string text, int posX, int posY, int fontSize, Color color)
         {
             Raylib.DrawText(text, posX, posY, fontSize, color);
         }
+        /// <summary>
+        /// Clears the background with the specified color.
+        /// </summary>
         public void ClearBackground(Color color)
         {
             Raylib.ClearBackground(color);
@@ -90,7 +121,9 @@ namespace tictactoe.RaylibManager
         private static RaylibManager instance;
 
         private RaylibManager() { }
-
+        /// <summary>
+        /// Gets an instance of the RaylibManager.
+        /// </summary>
         public static RaylibManager Instance
         {
             get

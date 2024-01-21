@@ -7,8 +7,10 @@ using System.Text;
 using System.Threading.Tasks;
 using tictactoe.RaylibManager;
 using tictactoe.State;
-
-    public class GameManager
+/// <summary>
+/// Manages the Tic Tac Toe game.
+/// </summary>
+public class GameManager
     {
         private Machine p1;
         private Machine p2;
@@ -39,6 +41,9 @@ using tictactoe.State;
             raylibManager = raylibManager_;
             currentState = new State();
         }
+        /// <summary>
+        /// Resets the game by resetting player states.
+        /// </summary>
         public void Reset()
         {
             if (p1 != null)
@@ -50,7 +55,9 @@ using tictactoe.State;
                 p2.Reset();
             }   
         }
-        
+        /// <summary>
+        /// Alternates between players indefinitely.
+        /// </summary>
         public IEnumerable<Machine> Alternate()
         {
             while (true)
@@ -59,86 +66,35 @@ using tictactoe.State;
                 yield return p2;
             }
         }
-        public IEnumerable<object> Alternate2()
+        /// <summary>
+        /// Plays the Tic Tac Toe game by coordinating player moves and checking for a winner.
+        /// </summary>
+        public int Play(bool printState = false)
         {
-            while (true)
-            {
-                yield return p3;
-                yield return p2;
-            }
-    }
-
-    public int Play(bool printState = false)
-    {
-        var alternator = Alternate().GetEnumerator();
-        Reset();
-        currentState = new State();
-        p1.SetState(currentState);
-        p2.SetState(currentState);
-        while (true)
-        {
-            currentPlayer = alternator.MoveNext() ? alternator.Current : null;
-            if (currentPlayer == null)
-            {
-                break;
-            }
-            
-            var (i, j, symbol) = currentPlayer.Act();
-            var nextHash = currentState.NextState(i, j, symbol).Hash();
-            (currentState, var isEnd) = all_states[nextHash];
+            var alternator = Alternate().GetEnumerator();
+            Reset();
+            currentState = new State();
             p1.SetState(currentState);
             p2.SetState(currentState);
-            if (isEnd)
+            while (true)
             {
-                return currentState.Winner;
+                currentPlayer = alternator.MoveNext() ? alternator.Current : null;
+                if (currentPlayer == null)
+                {
+                    break;
+                }
+            
+                var (i, j, symbol) = currentPlayer.Act();
+                var nextHash = currentState.NextState(i, j, symbol).Hash();
+                (currentState, var isEnd) = all_states[nextHash];
+                p1.SetState(currentState);
+                p2.SetState(currentState);
+                if (isEnd)
+                {
+                    return currentState.Winner;
+                }
             }
+            return 0;
         }
-        return 0;
-    }
-    public int PlayHuman(bool pressed,bool printState = false)
-    {
-        var alternator = Alternate2().GetEnumerator();
-        Reset();
-        currentState = new State();
-        p3.SetState(currentState);
-        p2.SetState(currentState);
-        if (printState)
-        {
-            //currentState.PrintState();
-        }
-
-        while (true)
-        {
-            var (i, j, symbol) = (-99, -99, -99);
-            var c = alternator.MoveNext() ? alternator.Current : null;
-            if (c == null)
-            {
-                break;
-            }
-
-            try
-            {
-                var player = (Machine)c;
-
-                (i, j, symbol) = player.Act();
-            }
-            catch (InvalidCastException)
-            {                 
-                var humanPlayer = (Human)c;
-                j = (int)(j/ (600 / 3)); 
-                i = (int)(i/ (600 / 3));
-                symbol = humanPlayer.symbol.Value;
-            }
-            var nextHash = currentState.NextState(i, j, symbol).Hash();
-            (currentState, var isEnd) = all_states[nextHash];
-            p3.SetState(currentState);
-            p2.SetState(currentState);
-            if (isEnd)
-            {
-                return currentState.Winner;
-            }
-        }
-        return 0;
-    }
 }
 

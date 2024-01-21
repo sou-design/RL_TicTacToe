@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using tictactoe.State;
-
+/// <summary>
+/// Represents a machine player in the Tic Tac Toe game.
+/// </summary>
 public class Machine
 {
     public Dictionary<int, double> estimations;
@@ -23,16 +25,25 @@ public class Machine
         greedy = new List<bool>();
         symbol = 0;
     }
+    /// <summary>
+    /// Resets the machine player by clearing the lists of visited states and greedy flags.
+    /// </summary>
     public void Reset()
     {
         states.Clear();
         greedy.Clear();
     }
+    /// <summary>
+    /// Sets the current state for the machine player.
+    /// </summary>
     public void SetState(State state)
     {
         states.Add(state);
         greedy.Add(true);
     }
+    /// <summary>
+    /// Sets the symbol for the machine player and initializes state-value estimations based on game outcomes.
+    /// </summary>
     public void SetSymbol(int symbol, Dictionary<int, Tuple<State, bool>> all_states)
     {
         this.symbol = symbol;
@@ -61,6 +72,9 @@ public class Machine
             }
         }
     }
+    /// <summary>
+    /// Backs up state-value estimations based on the outcome of the game.
+    /// </summary>
     public void Backup()
     {
         var states = this.states.ConvertAll(state => state.Hash());
@@ -72,6 +86,9 @@ public class Machine
             estimations[state] += stepSize * tdError;
         }
     }
+    /// <summary>
+    /// Determines the action to take (row, column, and symbol) based on the current state.
+    /// </summary>
     public (int i, int j, int symbol) Act()
     {
         var state = states[states.Count - 1];
@@ -121,12 +138,18 @@ public class Machine
         
         return (chosenAction[0], chosenAction[1], chosenAction[2]); // Return a tuple
     }
+    /// <summary>
+    /// Saves the state-value estimations to a JSON file.
+    /// </summary>
     public void SavePolicy()
     {
         var fileName = string.Format("policy_{0}.json", symbol == 1 ? "first" : "second");
         var jsonString = JsonSerializer.Serialize(estimations);
         File.WriteAllText(fileName, jsonString);
     }
+    /// <summary>
+    /// Loads state-value estimations from a JSON file.
+    /// </summary>
     public void LoadPolicy()
     {
         var fileName = string.Format("policy_{0}.json", symbol == 1 ? "first" : "second");
