@@ -1,7 +1,7 @@
 # 🎮 Tic Tac Toe avec le reinforcement Learning (RL)
 
-Le projet consiste en l'implémentation du jeu du **Morpion (Tic Tac Toe)** en utilisant le langage **C#** et la bibliothèque **Raylib** pour la gestion de l'interface graphique.  
-L'objectif principal est d'introduire des joueurs artificiels utilisant des techniques d'apprentissage par renforcement pour améliorer leurs performances au fil du temps.
+Le projet consiste en l'implémentation du jeu du **Morpion (Tic Tac Toe)** en utilisant le langage **C#** et la bibliothèque **Raylib** pour la gestion de l'interface graphique. L'objectif principal est d'introduire des joueurs artificiels utilisant des techniques d'apprentissage par renforcement pour améliorer leurs performances au fil du temps.
+
 <img width="435" height="455" alt="image" src="https://github.com/user-attachments/assets/83e86623-711f-415a-abb9-28ff841aa293" />
 
 ---
