@@ -37,10 +37,10 @@ Elle enregistre l'état du plateau pour les deux joueurs, met à jour l'état lo
 
 Représentant respectivement le joueur humain et les joueurs artificiels, ces classes implémentent les actions possibles pour chaque type de joueur. Les joueurs artificiels utilisent l'apprentissage par renforcement pour améliorer leurs stratégies au fil du temps.
 
-### ● 🛠️ La classe GameUtility
+### ● La classe GameUtility
 
 Cette classe contient des utilitaires pour la génération de tous les états possibles du jeu, nécessaire pour l'apprentissage par renforcement.
 
-### ● 🎨 La classe RaylibManager
+### ● La classe RaylibManager
 
 Cette classe gère l'interface graphique du jeu en utilisant la bibliothèque Raylib. Elle assure l'initialisation de la fenêtre, le dessin du plateau de jeu, et la capture des actions de la souris.
